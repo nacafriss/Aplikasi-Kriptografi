@@ -3,26 +3,33 @@ import pandas as pd
 
 from utils import text_to_bytes, bytes_to_text, bytes_to_hex, hex_to_bytes, byte_to_bits
 
-def lfsr_keystream(seed_bit: str, panjang: int):
+def lfsr_keystream(seed_bit, panjang):
     register = [int(bit) for bit in seed_bit]
-
-    bit_keluaran = []
+    keystream = []
     jejak_proses = []
 
-    for langkah_ke in range(panjang):
-        bit_keluar = register[-1]  
-        bit_feedback = register[0] ^ register[-1]  
+    for langkah in range(panjang):
+        # 1. Ambil output
+        bit_keluar = register[-1]
 
+        # 2. Hitung feedback
+        bit_feedback = register[0] ^ register[-1]
+
+        # 3. Simpan keystream
+        keystream.append(bit_keluar)
+
+        # 4. Catat proses
         jejak_proses.append({
-            "Clock ke-": langkah_ke + 1,
-            "Register (b1..bn)": ''.join(str(bit) for bit in register),
-            "Keluaran (bn)": bit_keluar,
-            "Feedback (b1 XOR bn)": bit_feedback,
+            "Clock": langkah + 1,
+            "Register": ''.join(map(str, register)),
+            "Output": bit_keluar,
+            "Feedback": bit_feedback
         })
 
-        bit_keluaran.append(bit_keluar)
+        # 5. Shift register
+        register = [bit_feedback] + register[:-1]
 
-    return bit_keluaran, jejak_proses
+    return keystream, jejak_proses
 
 
 def xor_stream_process(daftar_byte, seed_bit, mode):
