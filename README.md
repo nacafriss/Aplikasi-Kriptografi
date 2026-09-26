@@ -63,7 +63,7 @@ Aplikasi Kriptografi
 │
 └── Utils
     ├── Konversi teks ↔ byte
-    ├── Konversi byte ↔ HEX
+    ├── Konversi byte ↔ base64
     └── Konversi byte → bit
 ```
 
@@ -290,7 +290,7 @@ Keystream  : 11110110
 XOR        : 10110111
 ```
 
-Hasil tersebut kemudian dikonversikan kembali menjadi byte dan ditampilkan dalam format hexadecimal.
+Hasil tersebut kemudian dikonversikan kembali menjadi byte dan ditampilkan dalam format base64.
 
 ---
 
@@ -461,7 +461,7 @@ byte_tahap3, langkah3, jejak_lfsr = xor_stream_process(
 )
 ```
 
-Hasil tahap ini disimpan dalam bentuk byte dan dapat ditampilkan sebagai HEX.
+Hasil tahap ini disimpan dalam bentuk byte dan dapat ditampilkan sebagai base64.
 
 ---
 
