@@ -84,6 +84,36 @@ def sdes_process_block(delapan_bit, k1, k2, mode):
     }
     return hasil_akhir, rincian_proses
 
+def teks_ke_kunci_10bit(kunci_teks: str):
+    """Konversi kunci berupa plain text menjadi kunci 10-bit biner.
+
+    Setiap karakter diubah ke kode ASCII, lalu ke 8-bit biner, seluruh bit
+    digabung, kemudian diambil/dipotong menjadi 10 bit (jika kurang dari
+    10 bit maka akan di-pad dengan '0' di sebelah kanan).
+    """
+    daftar_byte = text_to_bytes(kunci_teks)
+
+    rincian = []
+    semua_bit = ""
+    for nomor, (karakter, byte_asal) in enumerate(zip(kunci_teks, daftar_byte)):
+        bit8 = byte_to_bits(byte_asal)
+        semua_bit += bit8
+        rincian.append({
+            "No": nomor + 1,
+            "Karakter": karakter,
+            "Kode ASCII": byte_asal,
+            "8-bit Biner": bit8,
+        })
+
+    if len(semua_bit) >= 10:
+        kunci_10bit = semua_bit[:10]
+        keterangan = f"Diambil 10 bit pertama dari {len(semua_bit)} bit hasil gabungan."
+    else:
+        kunci_10bit = semua_bit.ljust(10, "0")
+        keterangan = f"Bit hasil gabungan hanya {len(semua_bit)} bit, di-pad '0' di kanan hingga 10 bit."
+
+    return kunci_10bit, semua_bit, rincian, keterangan
+
 
 def sdes_key_process(daftar_byte, kunci_10bit, mode):
     k1, k2 = sdes_generate_keys(kunci_10bit)
@@ -107,6 +137,7 @@ def sdes_key_process(daftar_byte, kunci_10bit, mode):
             "Setelah fK2": rincian["Setelah fK2"],
             "Bit Hasil": rincian["IP-1 (hasil)"],
             "Byte Hasil": byte_hasil,
+            "Byte Hasil (HEX)": f"{byte_hasil:02X}",
         })
 
     return hasil_byte, langkah, k1, k2
@@ -116,12 +147,19 @@ def tampilkan_halaman_block_cipher():
     st.title("Block Cipher (S-DES / Simplified DES)")
 
     mode = st.radio("Mode", ["Enkripsi", "Dekripsi"], horizontal=True, key="mode_sdes")
-    kunci_10bit = st.text_input("Kunci (10-bit biner)", "1010000010")
+    kunci_teks = st.text_input("Kunci (plain text)", "KU")
 
-    kunci_valid = len(kunci_10bit) == 10 and set(kunci_10bit) <= {"0", "1"}
-    if not kunci_valid:
-        st.error("Kunci harus berupa 10 digit biner (hanya 0/1), misalnya 1010000010.")
+    if not kunci_teks:
+        st.error("Kunci tidak boleh kosong.")
         return
+
+    kunci_10bit, semua_bit, rincian_kunci, keterangan_kunci = teks_ke_kunci_10bit(kunci_teks)
+
+    with st.expander("Proses Konversi Kunci: Plain Text → 10-bit Biner", expanded=True):
+        st.dataframe(pd.DataFrame(rincian_kunci), use_container_width=True, hide_index=True)
+        st.write(f"Gabungan seluruh bit: `{semua_bit}`")
+        st.write(keterangan_kunci)
+        st.success(f"Kunci 10-bit yang digunakan: **{kunci_10bit}**")
 
     if mode == "Enkripsi":
         teks = st.text_area("Plainteks", "Modern")
