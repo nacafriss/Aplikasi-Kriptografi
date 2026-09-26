@@ -85,12 +85,6 @@ def sdes_process_block(delapan_bit, k1, k2, mode):
     return hasil_akhir, rincian_proses
 
 def teks_ke_kunci_10bit(kunci_teks: str):
-    """Konversi kunci berupa plain text menjadi kunci 10-bit biner.
-
-    Setiap karakter diubah ke kode ASCII, lalu ke 8-bit biner, seluruh bit
-    digabung, kemudian diambil/dipotong menjadi 10 bit (jika kurang dari
-    10 bit maka akan di-pad dengan '0' di sebelah kanan).
-    """
     daftar_byte = text_to_bytes(kunci_teks)
 
     rincian = []
