@@ -9,16 +9,16 @@ def lfsr_keystream(seed_bit, panjang):
     jejak_proses = []
 
     for langkah in range(panjang):
-        # 1. Ambil output
+        # Ambil output
         bit_keluar = register[-1]
 
-        # 2. Hitung feedback
+        # Hitung feedback
         bit_feedback = register[0] ^ register[-1]
 
-        # 3. Simpan keystream
+        # Simpan keystream
         keystream.append(bit_keluar)
 
-        # 4. Catat proses
+        # 4. Mencatat proses
         jejak_proses.append({
             "Clock": langkah + 1,
             "Register": ''.join(map(str, register)),
@@ -26,7 +26,7 @@ def lfsr_keystream(seed_bit, panjang):
             "Feedback": bit_feedback
         })
 
-        # 5. Shift register
+        # Shift register
         register = [bit_feedback] + register[:-1]
 
     return keystream, jejak_proses
