@@ -132,8 +132,9 @@ def sdes_key_process(daftar_byte, kunci_10bit, mode):
             "Bit Hasil": rincian["IP-1 (hasil)"],
             "Byte Hasil": byte_hasil,
             "Byte Hasil (HEX)": f"{byte_hasil:02X}",
-            "Karakter": tampilkan_karakter(chr(byte_hasil)),
         })
+        if mode == "Dekripsi":
+            langkah[-1]["Karakter"] = tampilkan_karakter(chr(byte_hasil))
 
     return hasil_byte, langkah, k1, k2
 
@@ -165,6 +166,19 @@ def tampilkan_halaman_block_cipher():
             st.info(f"Sub-kunci internal → K1 = `{k1}`  |  K2 = `{k2}`")
             st.success(f"Cipherteks (HEX): **{bytes_to_hex(hasil_byte)}**")
 
+            rincian_plainteks = []
+            for nomor, (karakter, byte_asal) in enumerate(zip(teks, daftar_byte)):
+                rincian_plainteks.append({
+                    "No": nomor + 1,
+                    "Karakter": karakter,
+                    "Kode ASCII": byte_asal,
+                    "8-bit Biner": byte_to_bits(byte_asal),
+                })
+
+            with st.expander("Proses Konversi Plainteks: Teks → Biner", expanded=True):
+                st.dataframe(pd.DataFrame(rincian_plainteks), use_container_width=True, hide_index=True)
+
+
             with st.expander("Proses S-DES per Blok (8-bit)", expanded=True):
                 st.dataframe(pd.DataFrame(langkah), use_container_width=True, hide_index=True)
     else:
@@ -172,6 +186,12 @@ def tampilkan_halaman_block_cipher():
         if st.button("Dekripsi", key="btn_sdes_dec"):
             try:
                 daftar_byte = hex_to_bytes(cipher_hex)
+                hasil_byte, langkah, k1, k2 = sdes_key_process(daftar_byte, kunci_10bit, mode)
+
+                st.info(f"Sub-kunci internal → K1 = `{k1}`  |  K2 = `{k2}`")
+                st.success(f"Plainteks: **{bytes_to_text(hasil_byte)}**")
+
+
                 rincian_hex = []
                 for nomor, byte in enumerate(daftar_byte):
                     rincian_hex.append({
@@ -183,11 +203,6 @@ def tampilkan_halaman_block_cipher():
 
                 with st.expander("Proses Konversi Cipherteks: HEX → Byte", expanded=True):
                     st.dataframe(pd.DataFrame(rincian_hex), use_container_width=True, hide_index=True)
-
-                hasil_byte, langkah, k1, k2 = sdes_key_process(daftar_byte, kunci_10bit, mode)
-
-                st.info(f"Sub-kunci internal → K1 = `{k1}`  |  K2 = `{k2}`")
-                st.success(f"Plainteks: **{bytes_to_text(hasil_byte)}**")
 
                 with st.expander("Proses S-DES per Blok (8-bit)", expanded=True):
                     st.dataframe(pd.DataFrame(langkah), use_container_width=True, hide_index=True)
