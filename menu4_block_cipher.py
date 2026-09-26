@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 
-from utils import text_to_bytes, bytes_to_text, bytes_to_hex, hex_to_bytes, byte_to_bits
+from utils import text_to_bytes, bytes_to_text, bytes_to_hex, hex_to_bytes, byte_to_bits, tampilkan_karakter
 
 P10 = [3, 5, 2, 7, 4, 10, 1, 9, 8, 6]      
 P8 = [6, 3, 7, 4, 8, 5, 10, 9]              
@@ -132,6 +132,7 @@ def sdes_key_process(daftar_byte, kunci_10bit, mode):
             "Bit Hasil": rincian["IP-1 (hasil)"],
             "Byte Hasil": byte_hasil,
             "Byte Hasil (HEX)": f"{byte_hasil:02X}",
+            "Karakter": tampilkan_karakter(chr(byte_hasil)),
         })
 
     return hasil_byte, langkah, k1, k2
@@ -171,6 +172,18 @@ def tampilkan_halaman_block_cipher():
         if st.button("Dekripsi", key="btn_sdes_dec"):
             try:
                 daftar_byte = hex_to_bytes(cipher_hex)
+                rincian_hex = []
+                for nomor, byte in enumerate(daftar_byte):
+                    rincian_hex.append({
+                        "No": nomor + 1,
+                        "Pasangan HEX": f"{byte:02X}",
+                        "Nilai Desimal": byte,
+                        "8-bit Biner": byte_to_bits(byte),
+                    })
+
+                with st.expander("Proses Konversi Cipherteks: HEX → Byte", expanded=True):
+                    st.dataframe(pd.DataFrame(rincian_hex), use_container_width=True, hide_index=True)
+
                 hasil_byte, langkah, k1, k2 = sdes_key_process(daftar_byte, kunci_10bit, mode)
 
                 st.info(f"Sub-kunci internal → K1 = `{k1}`  |  K2 = `{k2}`")
